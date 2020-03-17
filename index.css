@@ -1,0 +1,30 @@
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(9,1fr);
+  margin: 0 auto;
+  width:400px;
+  height:400px;
+  background-color:#f1f1f1;
+}
+
+.cell {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px dashed black;
+}
+
+.cell:nth-child(-n+9),.cell:nth-child(n+28):nth-child(-n+36),.cell:nth-child(n+55):nth-child(-n+63){
+  border-top:1px solid black;
+}
+
+.cell:nth-child(n+19):nth-child(-n+27),.cell:nth-child(n+46):nth-child(-n+54),.cell:nth-child(n+73):nth-child(-n+81) { 
+  border-bottom:1px solid black;
+}
+
+.cell:nth-child(3n) { 
+  border-right:1px solid black;
+}
+.cell:nth-child(3n-2) { 
+  border-left:1px solid black;
+}
