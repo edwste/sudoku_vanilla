@@ -1,17 +1,44 @@
+*{
+  box-sizing:border-box;
+}
 .wrapper {
+  display: flex;
+  margin: 0 auto;
+  flex-direction:column;
+  width:270px;
+}
+
+.rowSpacing {
+  margin-top:0.5em;
+  margin-bottom:0.5em;
+  display: flex;
+  flex-direction:row;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.rowSpacing button {
+  border-radius: 5px;
+}
+
+
+.board {
   display: grid;
   grid-template-columns: repeat(9,1fr);
   margin: 0 auto;
-  width:400px;
-  height:400px;
-  background-color:#f1f1f1;
+  width:270px;
+  height:270px;
+  background-color:rgba(0,0,0,.03);
 }
 
 .cell {
+  width:30px;
+  height:30px;
+  font:1.2em helvetica;
   display:flex;
   align-items:center;
   justify-content:center;
-  border:1px dashed black;
+  box-shadow: 0 5px 5px rgba(0,0,0,0.3);
 }
 
 .cell:nth-child(-n+9),.cell:nth-child(n+28):nth-child(-n+36),.cell:nth-child(n+55):nth-child(-n+63){
@@ -27,4 +54,8 @@
 }
 .cell:nth-child(3n-2) { 
   border-left:1px solid black;
+}
+
+.cell:hover{
+  border: 3px solid green !important;
 }

@@ -4,7 +4,15 @@
 	<link rel="stylesheet" type="text/css" href="index.css">
 </head>
 <body>
-	<div id="root" class="wrapper">
+	<div class="wrapper">
+		<div class="rowSpacing">Sudoku</div>
+		<div id="board" class="board"></div>
+		<div class="rowSpacing">
+			<button>New</button>
+			<button>Solve</button>
+			<button>Reset</button>
+			<button id='difficulty' onclick="game.handleDifficulty()">Easy</button>
+		</div>
 	</div>
 	<script src="index.js"></script>
 </body>
