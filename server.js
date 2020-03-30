@@ -1,30 +1,17 @@
 // server.js
-// where your node app starts
-
-// we've started you off with Express (https://expressjs.com/)
-// but feel free to use whatever libraries or frameworks you'd like through `package.json`.
-const { exec } = require("child_process");
 const express = require("express");
 const app = express();
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
-// our default array of dreams
-const dreams = [
-  "Find and count some sheep",
-  "Climb a really tall mountain",
-  "Wash the dishes"
-];
 
-exec("./sugen generate", (error, stdout,stderr) => {
-    if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-    }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
-    parseSudoku(stdout);
-});
+
+async function generateSudoku() {
+  const { stdout, stderr } = await exec("./sugen generate");
+  const sudokuParams=parseSudoku(stdout);
+  
+  return sudokuParams;
+}
 
 function parseSudoku(stdout){
 
@@ -32,7 +19,7 @@ function parseSudoku(stdout){
   const sudokuBoard = stdoutArr.slice(0,9);
   var boardArr = sudokuBoard.map(line => line.split('').filter(item=>item !== ' ').map(item=> {
   	if(item === '_'){
-  		return 0;
+  		return ' ';
   	} else {
   		return Number(item);
   	}
@@ -41,11 +28,8 @@ function parseSudoku(stdout){
   const difficultyLine = stdoutArr[10];
   difficultyLine.replace(/\s/g,'');
   const [first,difficultyStr] =  difficultyLine.split(':');
-
   const difficulty = Number(difficultyStr);
-  console.log(sudokuBoard);
-  console.log(boardArr);
-  console.log(difficulty);
+  return [boardArr,difficulty];
 }
 
 // make all the files in 'public' available
@@ -57,10 +41,14 @@ app.get("/", (request, response) => {
   response.sendFile(__dirname + "/views/index.html");
 });
 
-// send the default array of dreams to the webpage
-app.get("/dreams", (request, response) => {
-  // express helps us take JS objects and send them as JSON
-  response.json(dreams);
+app.get("/puzzle", async (request, response) => {
+  try {
+    const sudoku= await generateSudoku();
+    response.json(sudoku[0]);
+  } catch (err) {
+    console.log(err);
+    response.status(500);
+  }
 });
 
 // listen for requests :)

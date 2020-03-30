@@ -6,34 +6,19 @@ function Sudoku(params={}) {
     this.totalCells = this.sudokuBlock * this.sudokuBlock;
     
     this.init();
-    this.createBoard();
 }
 
 Sudoku.prototype.init = function() {
-    this.generatePuzzle(); 
-};
-
-Sudoku.prototype.initBoard = function() {
-    const board = new Array(this.sudokuBlock);
-    let i,j;
-    for (i=0; i<this.sudokuBlock; i++) {
-        board[i] = new Array(this.sudokuBlock);
-    }
-    for (i=0; i<this.sudokuBlock; i++) {
-        for (j=0; j<this.sudokuBlock; j++) {
-            board[i][j]=0;
-        }
-    }
-    return board;    
+    this.createDOMBoard();
+    this.handleNew(); 
 };
 
 Sudoku.prototype.handleNew = function () {
-    this.clearBoard();
     this.generatePuzzle();
 }
 
 Sudoku.prototype.handleSolve = function() {
-    this.recursiveSolve();
+    //this.recursiveSolve();      currently bugging out
 }
 
 Sudoku.prototype.handleReset = function() {
@@ -48,33 +33,37 @@ Sudoku.prototype.handleDifficulty = function() {
 }
 
 Sudoku.prototype.generatePuzzle = function() {
-    this.boardStart = this.initBoard();
+    this.boardStart = this.createAndClearBoard();
+    this.boardState = this.createAndClearBoard();
     //generate puzzle into boardStart
-    this.boardState = JSON.parse(JSON.stringify(this.boardStart));     //deep copy
+    fetch("/puzzle")
+      .then(response => response.json()) // parse the JSON from the server
+      .then((items) => {
+    this.boardStart = this.setBoard(items);
+    this.boardState = this.setBoard(items);
+    this.setDOMBoard(this.boardState);
+  });
 }
 
 Sudoku.prototype.recursiveSolve = function() {
     var i,empty;
-    empty = this.findNextEmptySpot();
-    if(empty[0]==-1)
+    const [x,y] = this.findNextEmptySpot();    //refactor into two items
+    if(x===-1)    
         return true;
     for(i=1;i<this.sudokuBlock+1;i++){
-        this.boardState[empty[0]][empty[1]]=i;
-        var v =document.getElementById('cell'+empty[0]+empty[1]);
-        v.textContent=i;
-        if(this.isValidMove(i,empty[0],empty[1])){
+        this.boardState[x][y]=i;
+        this.setDOMBoardElement(i,x,y);
+        if(this.isValidMove(i,x,y)){
             if(this.recursiveSolve())
                 return true;
         } else {
-            this.boardState[empty[0]][empty[1]]=0;
+            this.boardState[x][y]=' ';
+            this.setDOMBoardElement(' ',x,y);
         }
 
     }
     return false;
 }
-
-
-
 
 Sudoku.prototype.findNextEmptySpot = function() {
     let i,j;
@@ -82,7 +71,7 @@ Sudoku.prototype.findNextEmptySpot = function() {
     {
         for(j=0;j<this.sudokuBlock;j++)
         {
-            if (this.boardState[i][j]==0){
+            if (this.boardState[i][j]===' '){
                 return [i,j];
             }
         }
@@ -93,34 +82,51 @@ Sudoku.prototype.findNextEmptySpot = function() {
 Sudoku.prototype.isValidMove = function(input,x,y) {
     let i,j;
     for(i=0;i<this.sudokuBlock;i++){
-        if(input==this.boardState[x][i] && i!=y)
+        if(input===this.boardState[x][i] && i!=y)
             return false;
     }
     for(i=0;i<this.sudokuBlock;i++){
-        if(input==this.boardState[i][y] && i!=x)
+        if(input===this.boardState[i][y] && i!=x)
             return false;
     }
 
-    boardX = Math.floor((x)/this.n)
-    boardY = Math.floor((y)/this.n)
+    const boardX = Math.floor((x)/this.n);
+    const boardY = Math.floor((y)/this.n);
     for(i=0;i<this.n;i++){
         for(j=0;j<this.n;j++){
-            if(input==this.boardState[boardX*this.n+i][boardY*this.n+j] && boardX*this.n+i != x && boardY*this.n+j != y)
+            if(input===this.boardState[boardX*this.n+i][boardY*this.n+j] && boardX*this.n+i !== x && boardY*this.n+j !== y)
                 return false;
         }
     }
     return true;
 }
 
+Sudoku.prototype.createAndClearBoard = function() {
+    const board = new Array(this.sudokuBlock);
+    let i,j;
+    for (i=0; i<this.sudokuBlock; i++) {
+        board[i] = new Array(this.sudokuBlock);
+    }
+    for (i=0; i<this.sudokuBlock; i++) {
+        for (j=0; j<this.sudokuBlock; j++) {
+            board[i][j]=' ';
+        }
+    }
+    return board;    
+};
 
-Sudoku.prototype.createBoard = function() {
+Sudoku.prototype.setBoard = function(inputBoard) {
+  return JSON.parse(JSON.stringify(inputBoard));                //deep copy
+}
+
+Sudoku.prototype.createDOMBoard = function() {
     let i,j;
     for(i=0;i<this.sudokuBlock;i++)
     {
         for(j=0;j<this.sudokuBlock;j++)
         {
             var node = document.createElement('div');
-            node.textContent = ''+i+j;
+            node.textContent = ' ';
             node.id = 'cell'+i+j;
             node.classList.add("cell");
             document.getElementById("board").appendChild(node);
@@ -128,19 +134,32 @@ Sudoku.prototype.createBoard = function() {
     }
 };
 
-Sudoku.prototype.clearBoard = function() {
+Sudoku.prototype.clearDOMBoard = function() {
     let i,j;
     for(i=0;i<this.sudokuBlock;i++)
     {
         for(j=0;j<this.sudokuBlock;j++)
         {
-            this.boardState[i][j]=0;
-            this.boardStart[i][j]=0;
             var cell = document.getElementById('cell'+i+j);
             cell.textContent = ' ';
         }
     }
 };
 
+Sudoku.prototype.setDOMBoard = function(inputBoard) {
+    let i,j;
+    for(i=0;i<this.sudokuBlock;i++)
+    {
+        for(j=0;j<this.sudokuBlock;j++)
+        {
+            const cell = document.getElementById('cell'+i+j);
+            cell.textContent = inputBoard[i][j];
+        }
+    }
+};
+
+Sudoku.prototype.setDOMBoardElement = function(val,i,j) {
+    const cell = document.getElementById('cell'+i+j);
+    cell.textContent = val;
+}
 var game = new Sudoku();
-game.handleNew();
