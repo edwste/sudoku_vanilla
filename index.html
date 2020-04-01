@@ -8,11 +8,23 @@
 		<div class="rowSpacing">Sudoku</div>
 		<div id="board" class="board"></div>
 		<div class="rowSpacing">
-			<button>New</button>
-			<button>Solve</button>
-			<button>Reset</button>
+			<button onclick="game.handleNew()">New</button>
+			<button onclick="game.handleSolve()">Solve</button>
+			<button onclick="game.handleReset()">Reset</button>
 			<button id='difficulty' onclick="game.handleDifficulty()">Easy</button>
 		</div>
+	</div>
+	<div id="menu">
+		<button id='buttonCancel' onclick="game.handleMenuClick(event)">x</button>
+		<button id='button1' onclick="game.handleMenuClick(event)">1</button>
+		<button id='button2' onclick="game.handleMenuClick(event)">2</button>
+		<button id='button3' onclick="game.handleMenuClick(event)">3</button>
+		<button id='button4' onclick="game.handleMenuClick(event)">4</button>
+		<button id='button5' onclick="game.handleMenuClick(event)">5</button>
+		<button id='button6' onclick="game.handleMenuClick(event)">6</button>
+		<button id='button7' onclick="game.handleMenuClick(event)">7</button>
+		<button id='button8' onclick="game.handleMenuClick(event)">8</button>
+		<button id='button9' onclick="game.handleMenuClick(event)">9</button>
 	</div>
 	<script src="index.js"></script>
 </body>
